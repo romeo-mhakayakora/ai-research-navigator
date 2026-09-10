@@ -6,8 +6,6 @@ node_modules
 # next.js
 .next
 out
-build
-
 # env / secrets
 .env
 .env.local
@@ -19,8 +17,13 @@ build
 prisma/dev.db
 
 # logs & temp
-*.log
-npm-debug.log*
+# (specific log files are tracked — see below)
+build.log
+dev-server.log
+docker-build.log
+_probe-built.log
+_probe-key.mts
+_probe-results.json
 build.log
 dev-server.log
 docker-build.log
