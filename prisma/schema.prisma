@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite connector has no native enums — StageState.status, Message.role and
+// the String stage fields are validated at the app layer (Zod + gating).
+// Canonical values: stage F1..F7, status LOCKED|ACTIVE|COMPLETE,
+// role USER|ASSISTANT|SYSTEM|TOOL.
+
+model Project {
+  id          String          @id @default(cuid())
+  title       String
+  domain      String
+  userLevel   String
+  isDemo      Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  stages      StageState[]
+  messages    Message[]
+  artifacts   Artifact[]
+  papers      PaperRef[]
+  experiments ExperimentLog[]
+}
+
+model StageState {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage     String
+  status    String   @default("LOCKED")
+  data      String   @default("{}")
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, stage])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage     String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([projectId, stage, createdAt])
+}
+
+model Artifact {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage     String
+  kind      String
+  title     String
+  content   String
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, stage, kind])
+  @@index([projectId, stage, kind])
+}
+
+model PaperRef {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage       String
+  title       String
+  authors     String
+  year        Int
+  venue       String
+  abstract    String
+  url         String
+  source      String
+  extId       String
+  score       Float    @default(0)
+  reason      String   @default("")
+  solutionTag String   @default("")
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, extId])
+  @@index([projectId, stage])
+}
+
+model ExperimentLog {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  hypothesis String
+  result     String   @default("")
+  learning   String   @default("")
+  createdAt  DateTime @default(now())
+}
+
+// Standalone paper-reading sessions — not tied to a Project. One per paper.
+model PaperSession {
+  id          String   @id @default(cuid())
+  isDemo      Boolean  @default(false)
+  title       String
+  meta        String   @default("{}") // { authors, year, url, source }
+  fullText    String   @default("")   // truncated for prompts
+  sections    String   @default("[]") // [{ index, heading, text }]
+  quizzes     String   @default("[]") // [{ scope, date, questions, answers, score, maxScore }]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
