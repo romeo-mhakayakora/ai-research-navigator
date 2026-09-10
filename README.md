@@ -119,7 +119,15 @@ The output is a structured verdict — `proceed`, `refine`, or `pivot` — with 
 suggestions. You can iterate: refine the methodology and run validation again until the
 verdict is `proceed`.
 
-### Stages 5–7 — Build Coach, Paper Writing, Publish (roadmap)
+### Stages 5–7 — Build Coach, Paper Writing, Publish
+
+These stages are fully wired and part of the live demo:
+
+- **F5 Build Coach** — chat-based implementation coaching plus experiment logging and stage completion. The demo project has a stored coaching thread and 3 sample experiment logs.
+- **F6 Paper Writing** — section-by-section drafting help with reference linking.
+- **F7 Publish** — venue recommendations and submission checklist.
+
+Each stage has a UI page and real API routes; the seeded demo project has all seven stages marked COMPLETE with realistic content.
 
 After validation, the natural next steps are helping the user design the actual build,
 structure the paper, and prepare for publication. These stages have UI pages and API
